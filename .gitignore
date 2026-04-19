@@ -3,3 +3,16 @@ dist
 *.local
 .DS_Store
 tsconfig.tsbuildinfo
+
+# Rails API (backend/)
+backend/.bundle/
+backend/vendor/bundle/
+backend/log/*
+backend/tmp/*
+!backend/log/.keep
+!backend/tmp/.keep
+!backend/tmp/pids/.keep
+backend/storage/*
+!backend/storage/.keep
+backend/.env
+backend/config/master.key

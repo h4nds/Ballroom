@@ -23,18 +23,20 @@ const disciplines: UserProfile["discipline"][] = [
 ];
 
 export function ProfileModal({ open, onClose }: Props) {
-  const { user, updateProfile, logout } = useUser();
+  const { user, updateProfile, logout, authPending } = useUser();
   const { play } = useForumSounds(user?.soundsEnabled ?? true);
   const titleId = useId();
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
   const [discipline, setDiscipline] = useState(user?.discipline ?? "general");
   const [accent, setAccent] = useState(user?.accent ?? "purple");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (user && open) {
       setDisplayName(user.displayName);
       setDiscipline(user.discipline);
       setAccent(user.accent);
+      setError(null);
     }
   }, [user, open]);
 
@@ -49,26 +51,21 @@ export function ProfileModal({ open, onClose }: Props) {
 
   if (!open || !user) return null;
 
-  const save = (e: React.FormEvent) => {
+  const save = async (e: React.FormEvent) => {
     e.preventDefault();
-    play("success");
-    updateProfile({
+    const result = await updateProfile({
       displayName: displayName.trim() || user.username,
       discipline,
       accent,
     });
-    onClose();
-  };
+    if (!result.ok) {
+      play("whoosh");
+      setError(result.error);
+      return;
+    }
 
-  const exportProfile = () => {
-    const blob = new Blob([JSON.stringify(user, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `ballroom-profile-${user.username}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
     play("success");
+    onClose();
   };
 
   return (
@@ -133,31 +130,27 @@ export function ProfileModal({ open, onClose }: Props) {
             <summary className="security-summary">Account &amp; security</summary>
             <div className="security-body">
               <p>
-                Right now there is <strong>no password</strong> and nothing is sent to a ballroom server.
-                Your profile lives in <strong>this browser’s storage</strong> only. Anyone who uses this
-                device or clears site data can affect it — that’s fine for a prototype, not for sensitive
-                data.
+                Your account now uses a server-side session and stored credentials. Keep your password
+                unique, and sign out on shared devices.
               </p>
               <p>
-                <strong>Next step for real security:</strong> accounts backed by a server — hashed
-                passwords (or magic links), optional two-factor, and OAuth (Google, Apple, etc.) so you
-                can sign in from any device.
+                <strong>Next security step:</strong> add password reset, optional 2FA, and OAuth providers
+                so recovery and multi-device sign-in are smoother.
               </p>
-              <button type="button" className="btn-ghost security-export" onClick={exportProfile}>
-                Download my profile (JSON)
-              </button>
             </div>
           </details>
+          {error ? <p className="modal-hint" role="alert">{error}</p> : null}
 
           <div className="modal-actions split">
             <button
               type="button"
               className="btn-ghost danger"
-              onClick={() => {
+              onClick={async () => {
                 play("whoosh");
-                logout();
+                await logout();
                 onClose();
               }}
+              disabled={authPending}
             >
               sign out
             </button>
@@ -165,7 +158,7 @@ export function ProfileModal({ open, onClose }: Props) {
               <button type="button" className="btn-ghost" onClick={onClose}>
                 cancel
               </button>
-              <button type="submit" className="btn-primary">
+              <button type="submit" className="btn-primary" disabled={authPending}>
                 save
               </button>
             </div>

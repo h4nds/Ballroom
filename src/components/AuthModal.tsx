@@ -11,9 +11,12 @@ type Props = {
 };
 
 export function AuthModal({ open, mode, onModeChange, onClose }: Props) {
-  const { login, user } = useUser();
+  const { login, user, authPending } = useUser();
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const titleId = useId();
   const { play } = useForumSounds(user?.soundsEnabled ?? true);
 
@@ -39,18 +42,35 @@ export function AuthModal({ open, mode, onModeChange, onClose }: Props) {
       setUsername("");
     }
     setDisplayName("");
+    setPassword("");
+    setPasswordConfirm("");
+    setError(null);
   }, [open, mode]);
 
   if (!open || !mode) return null;
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const u = username.trim();
-    if (!u) return;
+    if (!u || !password) return;
+    if (mode === "join" && password !== passwordConfirm) {
+      setError("passwords do not match");
+      return;
+    }
+
+    const result = await login({
+      mode,
+      username: u,
+      password,
+      displayName: displayName.trim() || undefined,
+    });
+    if (!result.ok) {
+      play("whoosh");
+      setError(result.error);
+      return;
+    }
+
     play("success");
-    login(u, displayName.trim() || undefined);
-    setUsername("");
-    setDisplayName("");
     onClose();
   };
 
@@ -58,12 +78,12 @@ export function AuthModal({ open, mode, onModeChange, onClose }: Props) {
     mode === "join"
       ? {
           title: "Join the floor",
-          hint: "Pick a username. Your profile stays in this browser until you sign out. Proper passwords and sync come when we wire up accounts on the server.",
+          hint: "Create a real account with a password. You can sign in on any device once the backend is running.",
           cta: "claim your spot",
         }
       : {
-          title: "Sign in on this device",
-          hint: "Use the same username you used before in this browser. A different username starts a new profile for this device (your previous handle’s data is still saved under that name).",
+          title: "Sign in",
+          hint: "Use your account username and password.",
           cta: "continue",
         };
 
@@ -124,13 +144,43 @@ export function AuthModal({ open, mode, onModeChange, onClose }: Props) {
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="how you want to appear"
               maxLength={48}
+              disabled={mode === "signin"}
             />
           </label>
+          <label className="field">
+            <span>password</span>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete={mode === "join" ? "new-password" : "current-password"}
+              minLength={8}
+              maxLength={72}
+            />
+          </label>
+          {mode === "join" ? (
+            <label className="field">
+              <span>confirm password</span>
+              <input
+                type="password"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                autoComplete="new-password"
+                minLength={8}
+                maxLength={72}
+              />
+            </label>
+          ) : null}
+          {error ? <p className="modal-hint" role="alert">{error}</p> : null}
           <div className="modal-actions">
             <button type="button" className="btn-ghost" onClick={onClose}>
               cancel
             </button>
-            <button type="submit" className="btn-primary" disabled={!username.trim()}>
+            <button
+              type="submit"
+              className="btn-primary"
+              disabled={!username.trim() || !password || authPending}
+            >
               {copy.cta}
             </button>
           </div>

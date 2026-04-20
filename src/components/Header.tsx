@@ -75,7 +75,9 @@ export function Header({ onOpenAuth, onOpenProfile }: Props) {
             <input
               type="checkbox"
               checked={user.soundsEnabled}
-              onChange={(e) => updateProfile({ soundsEnabled: e.target.checked })}
+              onChange={(e) => {
+                void updateProfile({ soundsEnabled: e.target.checked });
+              }}
             />
             <span>sounds</span>
           </label>

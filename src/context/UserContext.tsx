@@ -8,8 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import type { UserProfile } from "../types";
-
-const STORAGE_USER = "ballroom_user";
+import { apiFetch, refreshApiSession } from "../lib/api";
 
 /** Remembered after sign-out so “Sign in” can suggest the last handle on this device. */
 export const STORAGE_LAST_USERNAME = "ballroom_last_username";
@@ -35,19 +34,19 @@ export interface VisitInfo {
 interface UserContextValue {
   user: UserProfile | null;
   visitInfo: VisitInfo | null;
-  login: (username: string, displayName?: string) => void;
-  logout: () => void;
-  updateProfile: (patch: Partial<Omit<UserProfile, "username">>) => void;
+  authPending: boolean;
+  login: (input: {
+    mode: "join" | "signin";
+    username: string;
+    password: string;
+    displayName?: string;
+  }) => Promise<{ ok: true } | { ok: false; error: string }>;
+  logout: () => Promise<void>;
+  updateProfile: (
+    patch: Partial<Omit<UserProfile, "username">>,
+  ) => Promise<{ ok: true } | { ok: false; error: string }>;
   clearNewDay: () => void;
 }
-
-const defaultProfile = (username: string, displayName?: string): UserProfile => ({
-  username: username.trim().toLowerCase().replace(/\s+/g, "_"),
-  displayName: (displayName?.trim() || username.trim()) || "dancer",
-  discipline: "general",
-  accent: "purple",
-  soundsEnabled: true,
-});
 
 const UserContext = createContext<UserContextValue | null>(null);
 
@@ -72,17 +71,27 @@ function yesterdayKey() {
 }
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserProfile | null>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_USER);
-      if (!raw) return null;
-      return JSON.parse(raw) as UserProfile;
-    } catch {
-      return null;
-    }
-  });
-
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [authPending, setAuthPending] = useState(false);
   const [visitInfo, setVisitInfo] = useState<VisitInfo | null>(null);
+
+  const fetchMe = useCallback(async () => {
+    try {
+      const res = await apiFetch("/api/me");
+      if (!res.ok) {
+        setUser(null);
+        return;
+      }
+      const data = (await res.json()) as { user: UserProfile };
+      setUser(data.user);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchMe();
+  }, [fetchMe]);
 
   useEffect(() => {
     if (!user) {
@@ -117,34 +126,93 @@ export function UserProvider({ children }: { children: ReactNode }) {
     });
   }, [user?.username]);
 
-  useEffect(() => {
-    if (user) localStorage.setItem(STORAGE_USER, JSON.stringify(user));
-    else localStorage.removeItem(STORAGE_USER);
-  }, [user]);
+  const login = useCallback(
+    async (input: {
+      mode: "join" | "signin";
+      username: string;
+      password: string;
+      displayName?: string;
+    }) => {
+      setAuthPending(true);
+      try {
+        const endpoint = input.mode === "join" ? "/api/auth/sign_up" : "/api/auth/sign_in";
+        const payload: Record<string, unknown> = {
+          username: input.username,
+          password: input.password,
+        };
+        if (input.mode === "join") {
+          payload.display_name = input.displayName?.trim() || input.username.trim();
+          payload.password_confirmation = input.password;
+        }
 
-  const login = useCallback((username: string, displayName?: string) => {
-    const u = username.trim();
-    if (!u) return;
-    setUser(defaultProfile(u, displayName));
-  }, []);
+        const res = await apiFetch(endpoint, {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        const data = (await res.json()) as { user?: UserProfile; error?: string };
+        if (!res.ok || !data.user) {
+          return { ok: false as const, error: data.error || "authentication failed" };
+        }
 
-  const logout = useCallback(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_USER);
-      if (raw) {
-        const u = JSON.parse(raw) as UserProfile;
-        localStorage.setItem(STORAGE_LAST_USERNAME, u.username);
+        setUser(data.user);
+        localStorage.setItem(STORAGE_LAST_USERNAME, data.user.username);
+        await refreshApiSession();
+        return { ok: true as const };
+      } catch {
+        return { ok: false as const, error: "network error — check API server and retry" };
+      } finally {
+        setAuthPending(false);
       }
+    },
+    [],
+  );
+
+  const logout = useCallback(async () => {
+    try {
+      if (user?.username) localStorage.setItem(STORAGE_LAST_USERNAME, user.username);
     } catch {
       /* ignore */
     }
-    setUser(null);
-    localStorage.removeItem(STORAGE_USER);
-  }, []);
 
-  const updateProfile = useCallback((patch: Partial<Omit<UserProfile, "username">>) => {
-    setUser((prev) => (prev ? { ...prev, ...patch } : prev));
-  }, []);
+    setAuthPending(true);
+    try {
+      await apiFetch("/api/auth/sign_out", { method: "DELETE" });
+      await refreshApiSession();
+    } catch {
+      /* ignore network errors on logout */
+    }
+    setUser(null);
+    setAuthPending(false);
+  }, [user?.username]);
+
+  const updateProfile = useCallback(async (patch: Partial<Omit<UserProfile, "username">>) => {
+    if (!user) return { ok: false as const, error: "not signed in" };
+
+    setAuthPending(true);
+    try {
+      const payload: Record<string, unknown> = {};
+      if (patch.displayName != null) payload.display_name = patch.displayName;
+      if (patch.discipline != null) payload.discipline = patch.discipline;
+      if (patch.accent != null) payload.accent = patch.accent;
+      if (patch.soundsEnabled != null) payload.sounds_enabled = patch.soundsEnabled;
+
+      const res = await apiFetch("/api/me", {
+        method: "PATCH",
+        body: JSON.stringify(payload),
+      });
+      const data = (await res.json()) as { user?: UserProfile; error?: string };
+      if (!res.ok || !data.user) {
+        return { ok: false as const, error: data.error || "unable to save profile" };
+      }
+
+      setUser(data.user);
+      return { ok: true as const };
+    } catch {
+      return { ok: false as const, error: "network error — profile was not saved" };
+    } finally {
+      setAuthPending(false);
+    }
+  }, [user]);
 
   const clearNewDay = useCallback(() => {
     setVisitInfo((v) => (v ? { ...v, isNewDay: false } : v));
@@ -154,12 +222,13 @@ export function UserProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       visitInfo,
+      authPending,
       login,
       logout,
       updateProfile,
       clearNewDay,
     }),
-    [user, visitInfo, login, logout, updateProfile, clearNewDay],
+    [user, visitInfo, authPending, login, logout, updateProfile, clearNewDay],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

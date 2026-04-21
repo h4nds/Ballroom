@@ -57,7 +57,9 @@ body {
   z-index: 0;
 }
 
-.app-shell > *:not(.bg-noise) {
+/* Exclude overlays: fixed positioning must not be overridden by position: relative,
+   or modals/toasts render in document flow (e.g. sign-in at the bottom of the page). */
+.app-shell > *:not(.bg-noise):not(.modal-root):not(.toast) {
   position: relative;
   z-index: 1;
 }

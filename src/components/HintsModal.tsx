@@ -27,7 +27,23 @@ export function HintsModal({ open, onClose }: Props) {
         </h2>
         <ul className="hints-list">
           <li>
-            <kbd>?</kbd> open this sheet
+            <kbd>?</kbd> toggle this sheet
+          </li>
+          <li>
+            <kbd>Shift</kbd>+<kbd>H</kbd> open hints (from the main view)
+          </li>
+          <li>
+            <kbd>Shift</kbd>+<kbd>1</kbd>…<kbd>5</kbd> jump to boards, latest, showcase, collabs, events (main row
+            number keys)
+          </li>
+          <li>
+            <kbd>Shift</kbd>+<kbd>F</kbd> focus board search
+          </li>
+          <li>
+            signed in on the boards tab: use <strong>start a thread</strong> under a board to publish a post there
+          </li>
+          <li>
+            <strong>members</strong> in the header opens the directory — open someone’s card to follow them (when signed in)
           </li>
           <li>
             <kbd>Esc</kbd> close any open sheet

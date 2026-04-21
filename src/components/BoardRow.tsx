@@ -10,9 +10,12 @@ const accentClass: Record<Board["accent"], string> = {
 
 type Props = {
   board: Board;
+  /** Signed-in users can open the new-thread flow for this board. */
+  canPost?: boolean;
+  onStartThread?: (boardId: string) => void;
 };
 
-export function BoardRow({ board }: Props) {
+export function BoardRow({ board, canPost = false, onStartThread }: Props) {
   const { play } = useForumSounds();
 
   return (
@@ -26,6 +29,18 @@ export function BoardRow({ board }: Props) {
       <div className="board-main">
         <h3 className="board-title">{board.name}</h3>
         <p className="board-desc">{board.description}</p>
+        {canPost && onStartThread ? (
+          <button
+            type="button"
+            className="board-new-thread"
+            onClick={() => {
+              play("tap");
+              onStartThread(board.id);
+            }}
+          >
+            start a thread
+          </button>
+        ) : null}
       </div>
       <div className="board-metrics">
         <div>

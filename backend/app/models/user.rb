@@ -6,6 +6,12 @@ class User < ApplicationRecord
 
   has_secure_password
 
+  has_many :posts, dependent: :destroy
+  has_many :active_follows, class_name: "Follow", foreign_key: :follower_id, inverse_of: :follower, dependent: :destroy
+  has_many :passive_follows, class_name: "Follow", foreign_key: :following_id, inverse_of: :following, dependent: :destroy
+  has_many :following_users, through: :active_follows, source: :following
+  has_many :follower_users, through: :passive_follows, source: :follower
+
   before_validation :normalize_username
   before_validation :default_display_name
 
@@ -14,6 +20,11 @@ class User < ApplicationRecord
   validates :password, length: { minimum: 8 }, if: -> { password.present? }
   validates :discipline, inclusion: { in: DISCIPLINES }
   validates :accent, inclusion: { in: ACCENTS }
+  validates :bio, length: { maximum: 500 }
+
+  def self.find_by_username_param!(raw)
+    find_by!(username: raw.to_s.strip.downcase.gsub(/\s+/, "_"))
+  end
 
   private
 

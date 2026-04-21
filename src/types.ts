@@ -8,6 +8,29 @@ export interface UserProfile {
   discipline: "visual" | "motion" | "music" | "writing" | "general";
   accent: Accent;
   soundsEnabled: boolean;
+  /** Short public bio; empty string if unset. */
+  bio: string;
+}
+
+/** Another member’s profile from `GET /api/users/:username`. */
+export interface PublicUserProfile {
+  username: string;
+  displayName: string;
+  discipline: UserProfile["discipline"];
+  accent: Accent;
+  bio: string;
+  followersCount: number;
+  followingCount: number;
+  isSelf: boolean;
+  isFollowing: boolean;
+}
+
+/** Compact row from `GET /api/users`. */
+export interface UserCard {
+  username: string;
+  displayName: string;
+  discipline: UserProfile["discipline"];
+  accent: Accent;
 }
 
 export interface Board {
@@ -29,5 +52,16 @@ export interface Category {
   title: string;
   tagline: string;
   boards: Board[];
+}
+
+/** Post returned from `POST /api/posts`. */
+export interface PostRecord {
+  id: number;
+  boardId: string;
+  title: string;
+  body: string;
+  authorDisplayName: string;
+  authorUsername: string;
+  createdAt: string;
 }
 

@@ -78,7 +78,7 @@ export function AuthModal({ open, mode, onModeChange, onClose }: Props) {
     mode === "join"
       ? {
           title: "Join the floor",
-          hint: "Create a real account with a password. You can sign in on any device once the backend is running.",
+          hint: "Pick a unique handle (letters, numbers, underscores), a display name, and a password with at least 8 characters. Same session cookie is used after sign-in.",
           cta: "claim your spot",
         }
       : {

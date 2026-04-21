@@ -3,9 +3,11 @@ import { BoardRow } from "./BoardRow";
 
 type Props = {
   category: Category;
+  canPost?: boolean;
+  onStartThread?: (boardId: string) => void;
 };
 
-export function BoardSection({ category }: Props) {
+export function BoardSection({ category, canPost = false, onStartThread }: Props) {
   return (
     <section className="board-section" aria-labelledby={`cat-${category.id}`}>
       <header className="board-section-head">
@@ -16,7 +18,12 @@ export function BoardSection({ category }: Props) {
       </header>
       <div className="board-list">
         {category.boards.map((b) => (
-          <BoardRow key={b.id} board={b} />
+          <BoardRow
+            key={b.id}
+            board={b}
+            canPost={canPost}
+            onStartThread={onStartThread}
+          />
         ))}
       </div>
     </section>

@@ -23,20 +23,33 @@ const disciplines: UserProfile["discipline"][] = [
 ];
 
 export function ProfileModal({ open, onClose }: Props) {
-  const { user, updateProfile, logout, authPending } = useUser();
+  const { user, updateProfile, updatePassword, logout, authPending } = useUser();
   const { play } = useForumSounds();
   const titleId = useId();
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
   const [discipline, setDiscipline] = useState(user?.discipline ?? "general");
   const [accent, setAccent] = useState(user?.accent ?? "purple");
+  const [bio, setBio] = useState(user?.bio ?? "");
   const [error, setError] = useState<string | null>(null);
+
+  const [pwCurrent, setPwCurrent] = useState("");
+  const [pwNew, setPwNew] = useState("");
+  const [pwConfirm, setPwConfirm] = useState("");
+  const [pwError, setPwError] = useState<string | null>(null);
+  const [pwOk, setPwOk] = useState<string | null>(null);
 
   useEffect(() => {
     if (user && open) {
       setDisplayName(user.displayName);
       setDiscipline(user.discipline);
       setAccent(user.accent);
+      setBio(user.bio ?? "");
       setError(null);
+      setPwCurrent("");
+      setPwNew("");
+      setPwConfirm("");
+      setPwError(null);
+      setPwOk(null);
     }
   }, [user, open]);
 
@@ -57,6 +70,7 @@ export function ProfileModal({ open, onClose }: Props) {
       displayName: displayName.trim() || user.username,
       discipline,
       accent,
+      bio: bio.trim(),
     });
     if (!result.ok) {
       play("whoosh");
@@ -68,14 +82,43 @@ export function ProfileModal({ open, onClose }: Props) {
     onClose();
   };
 
+  const savePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwError(null);
+    setPwOk(null);
+    if (pwNew !== pwConfirm) {
+      setPwError("new passwords do not match");
+      return;
+    }
+    if (pwNew.length < 8) {
+      setPwError("new password must be at least 8 characters");
+      return;
+    }
+    const result = await updatePassword({
+      currentPassword: pwCurrent,
+      password: pwNew,
+      passwordConfirmation: pwConfirm,
+    });
+    if (!result.ok) {
+      play("whoosh");
+      setPwError(result.error);
+      return;
+    }
+    play("success");
+    setPwOk("password updated");
+    setPwCurrent("");
+    setPwNew("");
+    setPwConfirm("");
+  };
+
   return (
     <div className="modal-root" role="presentation" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal sheet-pop" role="dialog" aria-modal="true" aria-labelledby={titleId}>
+      <div className="modal sheet-pop profile-modal-wide" role="dialog" aria-modal="true" aria-labelledby={titleId}>
         <h2 id={titleId} className="modal-title">
           your spot
         </h2>
         <p className="modal-hint">
-          @{user.username} — keep it minimal: how you show up, your lane, and an accent for your dot.
+          @{user.username} — how you show up, your lane, accent, and a short bio others see on your public profile.
         </p>
         <form onSubmit={save} className="modal-form">
           <label className="field">
@@ -84,6 +127,17 @@ export function ProfileModal({ open, onClose }: Props) {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               maxLength={48}
+            />
+          </label>
+          <label className="field">
+            <span>bio</span>
+            <textarea
+              className="field-textarea"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="a line or two about what you make…"
+              rows={4}
+              maxLength={500}
             />
           </label>
           <fieldset className="field-row">
@@ -126,20 +180,11 @@ export function ProfileModal({ open, onClose }: Props) {
             </div>
           </fieldset>
 
-          <details className="security-panel">
-            <summary className="security-summary">Account &amp; security</summary>
-            <div className="security-body">
-              <p>
-                Your account now uses a server-side session and stored credentials. Keep your password
-                unique, and sign out on shared devices.
-              </p>
-              <p>
-                <strong>Next security step:</strong> add password reset, optional 2FA, and OAuth providers
-                so recovery and multi-device sign-in are smoother.
-              </p>
-            </div>
-          </details>
-          {error ? <p className="modal-hint" role="alert">{error}</p> : null}
+          {error ? (
+            <p className="field-error" role="alert">
+              {error}
+            </p>
+          ) : null}
 
           <div className="modal-actions split">
             <button
@@ -159,11 +204,66 @@ export function ProfileModal({ open, onClose }: Props) {
                 cancel
               </button>
               <button type="submit" className="btn-primary" disabled={authPending}>
-                save
+                save profile
               </button>
             </div>
           </div>
         </form>
+
+        <details className="security-panel profile-security">
+          <summary className="security-summary">Password &amp; account</summary>
+          <div className="security-body">
+            <form onSubmit={savePassword} className="modal-form password-inline-form">
+              <label className="field">
+                <span>current password</span>
+                <input
+                  type="password"
+                  value={pwCurrent}
+                  onChange={(e) => setPwCurrent(e.target.value)}
+                  autoComplete="current-password"
+                />
+              </label>
+              <label className="field">
+                <span>new password</span>
+                <input
+                  type="password"
+                  value={pwNew}
+                  onChange={(e) => setPwNew(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  maxLength={72}
+                />
+              </label>
+              <label className="field">
+                <span>confirm new password</span>
+                <input
+                  type="password"
+                  value={pwConfirm}
+                  onChange={(e) => setPwConfirm(e.target.value)}
+                  autoComplete="new-password"
+                  minLength={8}
+                  maxLength={72}
+                />
+              </label>
+              {pwError ? (
+                <p className="field-error" role="alert">
+                  {pwError}
+                </p>
+              ) : null}
+              {pwOk ? (
+                <p className="modal-hint" role="status">
+                  {pwOk}
+                </p>
+              ) : null}
+              <button type="submit" className="btn-primary" disabled={authPending}>
+                update password
+              </button>
+            </form>
+            <p className="security-footnote">
+              Sessions use a secure cookie on this site. Sign out on shared devices.
+            </p>
+          </div>
+        </details>
       </div>
     </div>
   );

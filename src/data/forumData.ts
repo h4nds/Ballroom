@@ -87,3 +87,13 @@ export const categories: Category[] = [
     ],
   },
 ];
+
+/** Labels for the new-post board picker; ids must match `Post::BOARD_SLUGS` on the server. */
+export function listBoardsForPicker(): { id: string; label: string }[] {
+  return categories.flatMap((cat) =>
+    cat.boards.map((b) => ({
+      id: b.id,
+      label: `${cat.title.replace(/^THE /, "")} — ${b.name}`,
+    })),
+  );
+}

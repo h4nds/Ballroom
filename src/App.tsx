@@ -4,6 +4,9 @@ import { UserProvider, useUser } from "./context/UserContext";
 import { SoundsProvider } from "./context/SoundsContext";
 import { categories } from "./data/forumData";
 import { filterCategories } from "./lib/filterCategories";
+import { isTypingInTextField, tabFromShiftDigitCode } from "./lib/keyboardNav";
+import { useForumSounds } from "./hooks/useForumSounds";
+import type { HeaderSearchHandle } from "./components/HeaderSearch";
 import { Header } from "./components/Header";
 import { SubNav } from "./components/SubNav";
 import { Hero } from "./components/Hero";
@@ -13,19 +16,33 @@ import { AuthModal } from "./components/AuthModal";
 import { ProfileModal } from "./components/ProfileModal";
 import { WelcomeToast } from "./components/WelcomeToast";
 import { HintsModal } from "./components/HintsModal";
+import { CreatePostModal } from "./components/CreatePostModal";
+import { MembersModal } from "./components/MembersModal";
+import { PublicProfileModal } from "./components/PublicProfileModal";
 import "./index.css";
 
 type Tab = "boards" | "latest" | "showcase" | "collabs" | "events";
 
 function ForumHome() {
   const { user, clearNewDay } = useUser();
+  const { play } = useForumSounds();
+  const searchRef = useRef<HeaderSearchHandle | null>(null);
   const [authMode, setAuthMode] = useState<AuthOpenMode | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("boards");
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [hintsOpen, setHintsOpen] = useState(false);
   const [boardSearchQuery, setBoardSearchQuery] = useState("");
+  const [createPostOpen, setCreatePostOpen] = useState(false);
+  const [createPostBoardId, setCreatePostBoardId] = useState("visual");
+  const [membersOpen, setMembersOpen] = useState(false);
+  const [publicProfileUsername, setPublicProfileUsername] = useState<string | null>(null);
   const prevUser = useRef<string | null>(null);
+
+  const openCreatePost = useCallback((boardId: string) => {
+    setCreatePostBoardId(boardId);
+    setCreatePostOpen(true);
+  }, []);
 
   const filteredCategories = useMemo(
     () => filterCategories(categories, boardSearchQuery),
@@ -34,15 +51,56 @@ function ForumHome() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "?" || e.repeat) return;
-      const t = e.target as HTMLElement | null;
-      if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.isContentEditable)) return;
-      e.preventDefault();
-      setHintsOpen((o) => !o);
+      if (e.repeat) return;
+
+      const typing = isTypingInTextField(e.target);
+
+      if (e.key === "?" && !typing) {
+        e.preventDefault();
+        setHintsOpen((o) => !o);
+        return;
+      }
+
+      if (typing) return;
+
+      const modalBlocking =
+        authMode !== null ||
+        profileOpen ||
+        hintsOpen ||
+        membersOpen ||
+        publicProfileUsername !== null ||
+        createPostOpen;
+
+      if (e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.code === "KeyH") {
+          if (!modalBlocking) {
+            e.preventDefault();
+            setHintsOpen(true);
+            play("tap");
+          }
+          return;
+        }
+
+        if (modalBlocking) return;
+
+        if (e.code === "KeyF") {
+          e.preventDefault();
+          searchRef.current?.focusSearch();
+          play("whoosh");
+          return;
+        }
+
+        const tab = tabFromShiftDigitCode(e.code);
+        if (tab) {
+          e.preventDefault();
+          setActiveTab(tab);
+          play("tap");
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  }, [authMode, profileOpen, hintsOpen, membersOpen, publicProfileUsername, createPostOpen, play]);
 
   useEffect(() => {
     if (boardSearchQuery.trim()) {
@@ -74,8 +132,10 @@ function ForumHome() {
       <Header
         onOpenAuth={setAuthMode}
         onOpenProfile={() => setProfileOpen(true)}
+        onOpenMembers={() => setMembersOpen(true)}
         boardSearchQuery={boardSearchQuery}
         onBoardSearchChange={setBoardSearchQuery}
+        searchRef={searchRef}
       />
       <SubNav active={activeTab} onChange={setActiveTab} />
 
@@ -97,7 +157,14 @@ function ForumHome() {
                   .
                 </p>
               ) : (
-                filteredCategories.map((cat) => <BoardSection key={cat.id} category={cat} />)
+                filteredCategories.map((cat) => (
+                  <BoardSection
+                    key={cat.id}
+                    category={cat}
+                    canPost={!!user}
+                    onStartThread={openCreatePost}
+                  />
+                ))
               )}
               {filteredCategories.length > 0 && (
                 <div className="scroll-hint" aria-hidden>
@@ -127,10 +194,32 @@ function ForumHome() {
       <ProfileModal open={profileOpen} onClose={() => setProfileOpen(false)} />
       <WelcomeToast show={welcomeOpen} onDismiss={dismissWelcome} />
       <HintsModal open={hintsOpen} onClose={() => setHintsOpen(false)} />
+      <CreatePostModal
+        open={createPostOpen}
+        defaultBoardId={createPostBoardId}
+        onClose={() => setCreatePostOpen(false)}
+      />
+      <MembersModal
+        open={membersOpen}
+        onClose={() => setMembersOpen(false)}
+        onSelectMember={(u) => {
+          setMembersOpen(false);
+          setPublicProfileUsername(u);
+        }}
+      />
+      <PublicProfileModal
+        open={publicProfileUsername !== null}
+        username={publicProfileUsername ?? ""}
+        onClose={() => setPublicProfileUsername(null)}
+      />
 
       <footer className="site-footer">
         <p>
-          2026 Ballroom Enwretched. All Rights reserved · built for creatives · Shift + <kbd className="footer-kbd">?</kbd> for keyboard hints
+          2026 Ballroom Enwretched. All Rights reserved · built for creatives ·{" "}
+          <kbd className="footer-kbd">?</kbd> keyboard hints ·{" "}
+          <kbd className="footer-kbd">Shift</kbd>+<kbd className="footer-kbd">1–5</kbd> sections ·{" "}
+          <kbd className="footer-kbd">Shift</kbd>+<kbd className="footer-kbd">F</kbd> search ·{" "}
+          <kbd className="footer-kbd">Shift</kbd>+<kbd className="footer-kbd">H</kbd> hints
         </p>
       </footer>
     </div>

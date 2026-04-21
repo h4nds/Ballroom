@@ -638,6 +638,13 @@ button.board-search-clear {
   color: var(--yellow);
 }
 
+.board-main {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+}
+
 .board-title {
   margin: 0 0 0.2rem;
   font-size: 1rem;
@@ -648,6 +655,32 @@ button.board-search-clear {
   margin: 0;
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+.board-new-thread {
+  margin-top: var(--space-3);
+  align-self: flex-start;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--purple);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.15em;
+}
+
+.board-new-thread:hover {
+  color: var(--pink);
+}
+
+.board-new-thread:focus-visible {
+  outline: none;
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px var(--bg-deep), 0 0 0 4px var(--purple-dim);
 }
 
 .board-metrics {
@@ -1039,6 +1072,205 @@ details[open] .security-summary::after {
   outline: none;
   border-color: var(--purple-dim);
   box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+}
+
+.field-select,
+.field-textarea {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  color: var(--text);
+  font: inherit;
+  font-size: 1rem;
+  text-transform: none;
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 6.5rem;
+  line-height: 1.45;
+}
+
+.field-select:focus,
+.field-textarea:focus {
+  outline: none;
+  border-color: var(--purple-dim);
+  box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.2);
+}
+
+.field-error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #f87171;
+}
+
+.create-post-modal.modal {
+  width: min(480px, 100%);
+}
+
+.profile-modal-wide.modal {
+  width: min(520px, 100%);
+}
+
+.members-modal.modal {
+  width: min(420px, 100%);
+}
+
+.members-status {
+  margin: 0 0 var(--space-4);
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.members-list {
+  list-style: none;
+  margin: 0 0 var(--space-5);
+  padding: 0;
+  max-height: min(50vh, 22rem);
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-deep);
+}
+
+.members-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease-out-soft);
+}
+
+.members-list li:last-child .members-row {
+  border-bottom: none;
+}
+
+.members-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.members-row:focus-visible {
+  outline: none;
+  background: rgba(168, 85, 247, 0.08);
+}
+
+.members-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.members-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.members-dot.accent-purple {
+  background: var(--purple);
+  box-shadow: 0 0 8px var(--purple-dim);
+}
+
+.members-dot.accent-green {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green-dim);
+}
+
+.members-dot.accent-yellow {
+  background: var(--yellow);
+  box-shadow: 0 0 8px var(--yellow-dim);
+}
+
+.members-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.members-handle {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.members-disc {
+  font-size: 0.72rem;
+  text-transform: lowercase;
+  color: #6b6b7a;
+  margin-left: auto;
+}
+
+.public-profile-modal.modal {
+  width: min(440px, 100%);
+}
+
+.public-profile-accent {
+  height: 4px;
+  border-radius: 4px;
+  margin: 0 0 var(--space-4);
+}
+
+.public-profile-accent.accent-purple {
+  background: linear-gradient(90deg, var(--purple), var(--pink));
+}
+
+.public-profile-accent.accent-green {
+  background: linear-gradient(90deg, var(--green), #4ade80);
+}
+
+.public-profile-accent.accent-yellow {
+  background: linear-gradient(90deg, var(--yellow), #fbbf24);
+}
+
+.public-profile-name {
+  margin: 0 0 var(--space-2);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.public-profile-meta {
+  margin: 0 0 var(--space-4);
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.public-profile-bio {
+  margin: 0 0 var(--space-5);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #c4c4d0;
+  white-space: pre-wrap;
+}
+
+.public-profile-bio-empty {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.public-profile-actions {
+  margin-bottom: var(--space-4);
+}
+
+.profile-security.password-inline-form {
+  margin-top: var(--space-3);
+}
+
+.security-footnote {
+  margin: var(--space-4) 0 0;
+  font-size: 0.78rem;
+  color: #6b6b7a;
+  line-height: 1.45;
 }
 
 .field-row {

@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { UserProfile } from "../types";
 import { apiFetch, refreshApiSession } from "../lib/api";
+import { updatePassword as submitPasswordChange } from "../lib/mePasswordApi";
 
 /** Remembered after sign-out so “Sign in” can suggest the last handle on this device. */
 export const STORAGE_LAST_USERNAME = "ballroom_last_username";
@@ -45,6 +46,11 @@ interface UserContextValue {
   updateProfile: (
     patch: Partial<Omit<UserProfile, "username">>,
   ) => Promise<{ ok: true } | { ok: false; error: string }>;
+  updatePassword: (input: {
+    currentPassword: string;
+    password: string;
+    passwordConfirmation: string;
+  }) => Promise<{ ok: true } | { ok: false; error: string }>;
   clearNewDay: () => void;
 }
 
@@ -83,7 +89,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return;
       }
       const data = (await res.json()) as { user: UserProfile };
-      setUser(data.user);
+      setUser({ ...data.user, bio: data.user.bio ?? "" });
     } catch {
       setUser(null);
     }
@@ -154,7 +160,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
           return { ok: false as const, error: data.error || "authentication failed" };
         }
 
-        setUser(data.user);
+        setUser({ ...data.user, bio: data.user.bio ?? "" });
         localStorage.setItem(STORAGE_LAST_USERNAME, data.user.username);
         await refreshApiSession();
         return { ok: true as const };
@@ -195,6 +201,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       if (patch.discipline != null) payload.discipline = patch.discipline;
       if (patch.accent != null) payload.accent = patch.accent;
       if (patch.soundsEnabled != null) payload.sounds_enabled = patch.soundsEnabled;
+      if (patch.bio != null) payload.bio = patch.bio;
 
       const res = await apiFetch("/api/me", {
         method: "PATCH",
@@ -205,7 +212,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         return { ok: false as const, error: data.error || "unable to save profile" };
       }
 
-      setUser(data.user);
+      setUser({ ...data.user, bio: data.user.bio ?? "" });
       return { ok: true as const };
     } catch {
       return { ok: false as const, error: "network error — profile was not saved" };
@@ -213,6 +220,29 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setAuthPending(false);
     }
   }, [user]);
+
+  const updatePassword = useCallback(
+    async (input: {
+      currentPassword: string;
+      password: string;
+      passwordConfirmation: string;
+    }) => {
+      if (!user) return { ok: false as const, error: "not signed in" };
+
+      setAuthPending(true);
+      try {
+        const result = await submitPasswordChange({
+          currentPassword: input.currentPassword,
+          password: input.password,
+          passwordConfirmation: input.passwordConfirmation,
+        });
+        return result;
+      } finally {
+        setAuthPending(false);
+      }
+    },
+    [user],
+  );
 
   const clearNewDay = useCallback(() => {
     setVisitInfo((v) => (v ? { ...v, isNewDay: false } : v));
@@ -226,9 +256,10 @@ export function UserProvider({ children }: { children: ReactNode }) {
       login,
       logout,
       updateProfile,
+      updatePassword,
       clearNewDay,
     }),
-    [user, visitInfo, authPending, login, logout, updateProfile, clearNewDay],
+    [user, visitInfo, authPending, login, logout, updateProfile, updatePassword, clearNewDay],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

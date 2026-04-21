@@ -1,12 +1,28 @@
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import { useForumSounds } from "../hooks/useForumSounds";
+
+export type HeaderSearchHandle = {
+  /** Expands the bar and focuses the input. */
+  focusSearch: () => void;
+};
 
 type Props = {
   query: string;
   onQueryChange: (value: string) => void;
 };
 
-export function HeaderSearch({ query, onQueryChange }: Props) {
+export const HeaderSearch = forwardRef<HeaderSearchHandle, Props>(function HeaderSearch(
+  { query, onQueryChange },
+  ref,
+) {
   const [expanded, setExpanded] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -17,6 +33,16 @@ export function HeaderSearch({ query, onQueryChange }: Props) {
     setExpanded(false);
     onQueryChange("");
   }, [onQueryChange]);
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      focusSearch: () => {
+        setExpanded(true);
+      },
+    }),
+    [],
+  );
 
   useEffect(() => {
     if (!expanded) return;
@@ -101,4 +127,4 @@ export function HeaderSearch({ query, onQueryChange }: Props) {
       )}
     </div>
   );
-}
+});

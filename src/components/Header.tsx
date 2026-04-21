@@ -1,21 +1,26 @@
+import type { Ref } from "react";
 import type { AuthOpenMode } from "../types";
 import { useForumSounds } from "../hooks/useForumSounds";
 import { useUser } from "../context/UserContext";
 import { useSounds } from "../context/SoundsContext";
-import { HeaderSearch } from "./HeaderSearch";
+import { HeaderSearch, type HeaderSearchHandle } from "./HeaderSearch";
 
 type Props = {
   onOpenAuth: (mode: AuthOpenMode) => void;
   onOpenProfile: () => void;
+  onOpenMembers: () => void;
   boardSearchQuery: string;
   onBoardSearchChange: (value: string) => void;
+  searchRef: Ref<HeaderSearchHandle | null>;
 };
 
 export function Header({
   onOpenAuth,
   onOpenProfile,
+  onOpenMembers,
   boardSearchQuery,
   onBoardSearchChange,
+  searchRef,
 }: Props) {
   const { user } = useUser();
   const { soundsEnabled, setSoundsEnabled } = useSounds();
@@ -32,8 +37,15 @@ export function Header({
         ballroom
       </a>
       <nav className="header-actions" aria-label="Account">
-        <HeaderSearch query={boardSearchQuery} onQueryChange={onBoardSearchChange} />
-        <button type="button" className="linkish" onClick={() => play("whoosh")}>
+        <HeaderSearch ref={searchRef} query={boardSearchQuery} onQueryChange={onBoardSearchChange} />
+        <button
+          type="button"
+          className="linkish"
+          onClick={() => {
+            play("whoosh");
+            onOpenMembers();
+          }}
+        >
           members
         </button>
         {user ? (

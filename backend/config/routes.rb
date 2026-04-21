@@ -7,8 +7,14 @@ Rails.application.routes.draw do
     post "echo", to: "echo#create"
     get "me", to: "me#show"
     patch "me", to: "me#update"
+    patch "me/password", to: "me#update_password"
+    get "users", to: "users#index"
+    get "users/:username", to: "users#show"
+    post "users/:username/follow", to: "follows#create"
+    delete "users/:username/follow", to: "follows#destroy"
     post "auth/sign_up", to: "auth#sign_up"
     post "auth/sign_in", to: "auth#sign_in"
     delete "auth/sign_out", to: "auth#sign_out"
+    resources :posts, only: %i[index create]
   end
 end

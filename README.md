@@ -9,7 +9,7 @@
                                                  ▀▀
 ```
 
-# Ballroom
+# The Ballroom Fourm by RayWretch 
 
 A React + Vite forum-style web app with a Rails JSON API. The Vite dev server proxies `/api` to Rails on port **3000**.
 
@@ -31,12 +31,6 @@ npm install
 
 ```bash
 cd backend
-bin/setup
-```
-
-Copy `backend/.env.example` to `backend/.env` and set `SECRET_KEY_BASE` (and database credentials if they differ from the defaults).
-
-## Development
 
 Run **two** processes:
 
@@ -64,7 +58,7 @@ Without the API running, auth and other `/api` calls will fail with a network er
 npm run build
 ```
 
-Preview the production build:
+
 
 ```bash
 npm run preview
@@ -72,4 +66,4 @@ npm run preview
 
 ## License
 
-Private / specify your license here.
+2026 RayWretch | h4nds| JN | EnWretched . All Rights Reserved

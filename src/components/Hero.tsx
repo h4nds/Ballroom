@@ -6,8 +6,7 @@ export function Hero() {
           welcome to the floor
         </p>
         <p className="hero-tagline">
-          a place for creatives to post work, find collaborators, and just exist on the internet without it
-          being weird about it.
+          um hey..
         </p>
       </div>
       <dl className="hero-stats">

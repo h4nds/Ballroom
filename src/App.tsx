@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AuthOpenMode } from "./types";
 import { UserProvider, useUser } from "./context/UserContext";
 import { SoundsProvider } from "./context/SoundsContext";
 import { categories } from "./data/forumData";
+import { filterCategories } from "./lib/filterCategories";
 import { Header } from "./components/Header";
 import { SubNav } from "./components/SubNav";
 import { Hero } from "./components/Hero";
@@ -23,7 +24,13 @@ function ForumHome() {
   const [activeTab, setActiveTab] = useState<Tab>("boards");
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [hintsOpen, setHintsOpen] = useState(false);
+  const [boardSearchQuery, setBoardSearchQuery] = useState("");
   const prevUser = useRef<string | null>(null);
+
+  const filteredCategories = useMemo(
+    () => filterCategories(categories, boardSearchQuery),
+    [boardSearchQuery],
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -36,6 +43,12 @@ function ForumHome() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+
+  useEffect(() => {
+    if (boardSearchQuery.trim()) {
+      setActiveTab("boards");
+    }
+  }, [boardSearchQuery]);
 
   useEffect(() => {
     if (!user) {
@@ -58,7 +71,12 @@ function ForumHome() {
   return (
     <div className="app-shell">
       <div className="bg-noise" aria-hidden />
-      <Header onOpenAuth={setAuthMode} onOpenProfile={() => setProfileOpen(true)} />
+      <Header
+        onOpenAuth={setAuthMode}
+        onOpenProfile={() => setProfileOpen(true)}
+        boardSearchQuery={boardSearchQuery}
+        onBoardSearchChange={setBoardSearchQuery}
+      />
       <SubNav active={activeTab} onChange={setActiveTab} />
 
       <main className="main-grid">
@@ -66,20 +84,33 @@ function ForumHome() {
           <Hero />
           {activeTab === "boards" && (
             <>
-              {categories.map((cat) => (
-                <BoardSection key={cat.id} category={cat} />
-              ))}
-              <div className="scroll-hint" aria-hidden>
-                <span className="scroll-arrow">↓</span>
-              </div>
+              {filteredCategories.length === 0 ? (
+                <p className="board-search-empty" role="status">
+                  No boards match “{boardSearchQuery.trim()}”. Try another word or{" "}
+                  <button
+                    type="button"
+                    className="linkish board-search-clear"
+                    onClick={() => setBoardSearchQuery("")}
+                  >
+                    clear search
+                  </button>
+                  .
+                </p>
+              ) : (
+                filteredCategories.map((cat) => <BoardSection key={cat.id} category={cat} />)
+              )}
+              {filteredCategories.length > 0 && (
+                <div className="scroll-hint" aria-hidden>
+                  <span className="scroll-arrow">↓</span>
+                </div>
+              )}
             </>
           )}
           {activeTab !== "boards" && (
             <section className="placeholder-panel sheet-pop">
               <h2 className="placeholder-title">{activeTab.replace("-", " ")}</h2>
               <p className="placeholder-copy">
-                this wing is still being hung with lights. next up: threads, uploads, and real-time
-                presence — for now, the boards tab is where the floor is live.
+                Hammer & nail!!!!
               </p>
             </section>
           )}
@@ -99,7 +130,7 @@ function ForumHome() {
 
       <footer className="site-footer">
         <p>
-          ballroom · built for creatives · press <kbd className="footer-kbd">?</kbd> for keyboard hints
+          2026 Ballroom Enwretched. All Rights reserved · built for creatives · Shift + <kbd className="footer-kbd">?</kbd> for keyboard hints
         </p>
       </footer>
     </div>

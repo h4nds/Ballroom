@@ -2,13 +2,21 @@ import type { AuthOpenMode } from "../types";
 import { useForumSounds } from "../hooks/useForumSounds";
 import { useUser } from "../context/UserContext";
 import { useSounds } from "../context/SoundsContext";
+import { HeaderSearch } from "./HeaderSearch";
 
 type Props = {
   onOpenAuth: (mode: AuthOpenMode) => void;
   onOpenProfile: () => void;
+  boardSearchQuery: string;
+  onBoardSearchChange: (value: string) => void;
 };
 
-export function Header({ onOpenAuth, onOpenProfile }: Props) {
+export function Header({
+  onOpenAuth,
+  onOpenProfile,
+  boardSearchQuery,
+  onBoardSearchChange,
+}: Props) {
   const { user } = useUser();
   const { soundsEnabled, setSoundsEnabled } = useSounds();
   const { play } = useForumSounds();
@@ -24,9 +32,7 @@ export function Header({ onOpenAuth, onOpenProfile }: Props) {
         ballroom
       </a>
       <nav className="header-actions" aria-label="Account">
-        <button type="button" className="linkish" onClick={() => play("whoosh")}>
-          search
-        </button>
+        <HeaderSearch query={boardSearchQuery} onQueryChange={onBoardSearchChange} />
         <button type="button" className="linkish" onClick={() => play("whoosh")}>
           members
         </button>

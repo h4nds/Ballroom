@@ -37,10 +37,10 @@ export function Header({
       >
         <img
           className="logo-img"
-          src="\public\Ballroom_site2.png"
+          src="/Ballroom_site2.png"
           alt=""
-          width={360}
-          height={90}
+          width={350}
+          height={150}
           decoding="async"
         />
       </a>

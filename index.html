@@ -1,10 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="night">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("ballroom_theme");
+          if (t === "night" || t === "darkness" || t === "grey") {
+            document.documentElement.setAttribute("data-theme", t);
+          }
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="public\Ballroom_site2.png" />
-    <meta name="theme-color" content="#050505" />
+    <link rel="apple-touch-icon" href="/logo-ballroom.png" />
+    <meta name="theme-color" content="#09090c" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ballroom — the floor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />

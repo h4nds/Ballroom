@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AuthOpenMode } from "./types";
 import { UserProvider, useUser } from "./context/UserContext";
 import { SoundsProvider } from "./context/SoundsContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import { categories } from "./data/forumData";
 import { filterCategories } from "./lib/filterCategories";
 import { isTypingInTextField, tabFromShiftDigitCode } from "./lib/keyboardNav";
@@ -19,6 +20,7 @@ import { HintsModal } from "./components/HintsModal";
 import { CreatePostModal } from "./components/CreatePostModal";
 import { MembersModal } from "./components/MembersModal";
 import { PublicProfileModal } from "./components/PublicProfileModal";
+import { ThemeSwitcher } from "./components/ThemeSwitcher";
 import "./index.css";
 
 type Tab = "boards" | "latest" | "showcase" | "collabs" | "events";
@@ -214,12 +216,10 @@ function ForumHome() {
       />
 
       <footer className="site-footer">
+        <ThemeSwitcher />
         <p>
           2026 Ballroom Enwretched. All Rights reserved · built for creatives ·{" "}
-          <kbd className="footer-kbd">?</kbd> keyboard hints ·{" "}
-          <kbd className="footer-kbd">Shift</kbd>+<kbd className="footer-kbd">1–5</kbd> sections ·{" "}
-          <kbd className="footer-kbd">Shift</kbd>+<kbd className="footer-kbd">F</kbd> search ·{" "}
-          <kbd className="footer-kbd">Shift</kbd>+<kbd className="footer-kbd">H</kbd> hints
+          shift + <kbd className="footer-kbd">?</kbd> keyboard hints ·{" "}
         </p>
       </footer>
     </div>
@@ -228,10 +228,12 @@ function ForumHome() {
 
 export default function App() {
   return (
-    <UserProvider>
-      <SoundsProvider>
-        <ForumHome />
-      </SoundsProvider>
-    </UserProvider>
+    <ThemeProvider>
+      <UserProvider>
+        <SoundsProvider>
+          <ForumHome />
+        </SoundsProvider>
+      </UserProvider>
+    </ThemeProvider>
   );
 }

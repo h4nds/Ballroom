@@ -1,7 +1,6 @@
 import type { Board } from "../types";
 import { BoardIcon } from "./BoardIcon";
 import { useForumSounds } from "../hooks/useForumSounds";
-import { useUser } from "../context/UserContext";
 
 const accentClass: Record<Board["accent"], string> = {
   purple: "accent-purple",
@@ -14,8 +13,7 @@ type Props = {
 };
 
 export function BoardRow({ board }: Props) {
-  const { user } = useUser();
-  const { play } = useForumSounds(user?.soundsEnabled ?? true);
+  const { play } = useForumSounds();
 
   return (
     <article

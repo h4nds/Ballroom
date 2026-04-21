@@ -11,14 +11,14 @@ type Props = {
 };
 
 export function AuthModal({ open, mode, onModeChange, onClose }: Props) {
-  const { login, user, authPending } = useUser();
+  const { login, authPending } = useUser();
   const [username, setUsername] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [error, setError] = useState<string | null>(null);
   const titleId = useId();
-  const { play } = useForumSounds(user?.soundsEnabled ?? true);
+  const { play } = useForumSounds();
 
   useEffect(() => {
     if (!open || !mode) return;

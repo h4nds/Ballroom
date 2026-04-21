@@ -9,7 +9,7 @@ type Props = {
 
 export function WelcomeToast({ show, onDismiss }: Props) {
   const { user, visitInfo } = useUser();
-  const { play } = useForumSounds(user?.soundsEnabled ?? true);
+  const { play } = useForumSounds();
   const playedRef = useRef(false);
 
   useEffect(() => {

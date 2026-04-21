@@ -1,5 +1,4 @@
 import { useForumSounds } from "../hooks/useForumSounds";
-import { useUser } from "../context/UserContext";
 
 const items = [
   { id: "boards", label: "boards" },
@@ -17,8 +16,7 @@ type Props = {
 };
 
 export function SubNav({ active, onChange }: Props) {
-  const { user } = useUser();
-  const { play } = useForumSounds(user?.soundsEnabled ?? true);
+  const { play } = useForumSounds();
 
   return (
     <nav className="subnav" aria-label="Sections">

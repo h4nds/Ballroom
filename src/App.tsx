@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { AuthOpenMode } from "./types";
 import { UserProvider, useUser } from "./context/UserContext";
+import { SoundsProvider } from "./context/SoundsContext";
 import { categories } from "./data/forumData";
 import { Header } from "./components/Header";
 import { SubNav } from "./components/SubNav";
@@ -108,7 +109,9 @@ function ForumHome() {
 export default function App() {
   return (
     <UserProvider>
-      <ForumHome />
+      <SoundsProvider>
+        <ForumHome />
+      </SoundsProvider>
     </UserProvider>
   );
 }

@@ -33,7 +33,7 @@ export function HintsModal({ open, onClose }: Props) {
             <kbd>Esc</kbd> close any open sheet
           </li>
           <li>when signed in, use the header <strong>profile</strong> button to change how you appear</li>
-          <li>sounds unlock after your first click — toggle them in the header when signed in</li>
+          <li>sounds unlock after your first click — toggle them with the header <strong>sounds</strong> switch</li>
         </ul>
         <div className="modal-actions">
           <button type="button" className="btn-primary" onClick={onClose}>

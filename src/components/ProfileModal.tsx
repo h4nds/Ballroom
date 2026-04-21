@@ -24,7 +24,7 @@ const disciplines: UserProfile["discipline"][] = [
 
 export function ProfileModal({ open, onClose }: Props) {
   const { user, updateProfile, logout, authPending } = useUser();
-  const { play } = useForumSounds(user?.soundsEnabled ?? true);
+  const { play } = useForumSounds();
   const titleId = useId();
   const [displayName, setDisplayName] = useState(user?.displayName ?? "");
   const [discipline, setDiscipline] = useState(user?.discipline ?? "general");

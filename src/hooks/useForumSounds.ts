@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { useSounds } from "../context/SoundsContext";
 
 let sharedCtx: AudioContext | null = null;
 
@@ -40,12 +41,13 @@ function tone(
   osc.stop(ctx.currentTime + start + duration + 0.05);
 }
 
-export function useForumSounds(enabled: boolean) {
+export function useForumSounds() {
+  const { soundsEnabled } = useSounds();
   const hoverGate = useRef(0);
 
   const play = useCallback(
     async (kind: "tap" | "hover" | "success" | "join" | "whoosh") => {
-      if (!enabled) return;
+      if (!soundsEnabled) return;
       const ctx = getCtx();
       if (!ctx) return;
       await resume(ctx);
@@ -103,7 +105,7 @@ export function useForumSounds(enabled: boolean) {
           break;
       }
     },
-    [enabled],
+    [soundsEnabled],
   );
 
   useEffect(() => {

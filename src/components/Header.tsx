@@ -1,6 +1,7 @@
 import type { AuthOpenMode } from "../types";
 import { useForumSounds } from "../hooks/useForumSounds";
 import { useUser } from "../context/UserContext";
+import { useSounds } from "../context/SoundsContext";
 
 type Props = {
   onOpenAuth: (mode: AuthOpenMode) => void;
@@ -8,8 +9,9 @@ type Props = {
 };
 
 export function Header({ onOpenAuth, onOpenProfile }: Props) {
-  const { user, updateProfile } = useUser();
-  const { play } = useForumSounds(user?.soundsEnabled ?? true);
+  const { user } = useUser();
+  const { soundsEnabled, setSoundsEnabled } = useSounds();
+  const { play } = useForumSounds();
 
   return (
     <header className="site-header">
@@ -70,18 +72,17 @@ export function Header({ onOpenAuth, onOpenProfile }: Props) {
             </button>
           </>
         )}
-        {user ? (
-          <label className="sound-toggle" title="UI sounds">
-            <input
-              type="checkbox"
-              checked={user.soundsEnabled}
-              onChange={(e) => {
-                void updateProfile({ soundsEnabled: e.target.checked });
-              }}
-            />
-            <span>sounds</span>
-          </label>
-        ) : null}
+        <label className="sound-toggle" title="UI sounds">
+          <input
+            type="checkbox"
+            checked={soundsEnabled}
+            onChange={(e) => {
+              play("tap");
+              setSoundsEnabled(e.target.checked);
+            }}
+          />
+          <span>sounds</span>
+        </label>
       </nav>
     </header>
   );

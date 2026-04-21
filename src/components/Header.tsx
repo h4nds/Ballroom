@@ -33,8 +33,16 @@ export function Header({
         className="logo"
         onPointerDown={() => play("tap")}
         onKeyDown={(e) => e.key === "Enter" && play("tap")}
+        aria-label="Ballroom — home"
       >
-        ballroom
+        <img
+          className="logo-img"
+          src="/logo-ballroom.png"
+          alt=""
+          width={360}
+          height={90}
+          decoding="async"
+        />
       </a>
       <nav className="header-actions" aria-label="Account">
         <HeaderSearch ref={searchRef} query={boardSearchQuery} onQueryChange={onBoardSearchChange} />

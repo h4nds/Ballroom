@@ -142,11 +142,11 @@ body {
   box-shadow: 0 0 0 2px var(--bg-deep), 0 0 0 4px var(--ring-focus);
 }
 
-/* Wide wordmark: cap height so the header row stays balanced; width follows aspect */
+/* Wordmark: large intrinsic box */
 .logo-img {
-  height: clamp(2rem, 1.65rem + 0.85vw, 2.875rem);
-  width: auto;
-  max-width: min(72vw, 300px);
+  width: 250px;
+  height: 100px;
+  overflow: hidden;
   object-fit: contain;
   object-position: left center;
   display: block;

@@ -37,7 +37,7 @@ export function Header({
       >
         <img
           className="logo-img"
-          src="/logo-ballroom.png"
+          src="\public\Ballroom_site2.png"
           alt=""
           width={360}
           height={90}

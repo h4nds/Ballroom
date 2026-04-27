@@ -65,3 +65,43 @@ export interface PostRecord {
   createdAt: string;
 }
 
+export interface ForumBoardRecord {
+  id: number;
+  slug: string;
+  name: string;
+  description: string;
+  threadCount: number;
+}
+
+export interface ForumThreadRow {
+  id: number;
+  boardSlug: string;
+  subject: string;
+  opBodyPreview: string;
+  authorDisplayName: string;
+  authorUsername: string;
+  replyCount: number;
+  createdAt: string;
+  bumpedAt: string;
+}
+
+export interface ForumThreadRecord {
+  id: number;
+  boardSlug: string;
+  subject: string;
+  opBody: string;
+  authorDisplayName: string;
+  authorUsername: string;
+  createdAt: string;
+  bumpedAt: string;
+}
+
+export interface ForumPostRecord {
+  id: number;
+  threadId: number;
+  body: string;
+  authorDisplayName: string;
+  authorUsername: string;
+  createdAt: string;
+}
+

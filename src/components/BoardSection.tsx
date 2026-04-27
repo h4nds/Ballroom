@@ -5,9 +5,10 @@ type Props = {
   category: Category;
   canPost?: boolean;
   onStartThread?: (boardId: string) => void;
+  onOpenBoard?: (boardId: string) => void;
 };
 
-export function BoardSection({ category, canPost = false, onStartThread }: Props) {
+export function BoardSection({ category, canPost = false, onStartThread, onOpenBoard }: Props) {
   return (
     <section className="board-section" aria-labelledby={`cat-${category.id}`}>
       <header className="board-section-head">
@@ -23,6 +24,7 @@ export function BoardSection({ category, canPost = false, onStartThread }: Props
             board={b}
             canPost={canPost}
             onStartThread={onStartThread}
+            onOpenBoard={onOpenBoard}
           />
         ))}
       </div>

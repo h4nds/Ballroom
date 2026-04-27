@@ -21,6 +21,8 @@ import { CreatePostModal } from "./components/CreatePostModal";
 import { MembersModal } from "./components/MembersModal";
 import { PublicProfileModal } from "./components/PublicProfileModal";
 import { ThemeSwitcher } from "./components/ThemeSwitcher";
+import { ForumBoardView } from "./components/ForumBoardView";
+import { ForumThreadView } from "./components/ForumThreadView";
 import "./index.css";
 
 type Tab = "boards" | "latest" | "showcase" | "collabs" | "events";
@@ -39,6 +41,8 @@ function ForumHome() {
   const [createPostBoardId, setCreatePostBoardId] = useState("visual");
   const [membersOpen, setMembersOpen] = useState(false);
   const [publicProfileUsername, setPublicProfileUsername] = useState<string | null>(null);
+  const [activeBoardSlug, setActiveBoardSlug] = useState<string | null>(null);
+  const [activeThreadId, setActiveThreadId] = useState<number | null>(null);
   const prevUser = useRef<string | null>(null);
 
   const openCreatePost = useCallback((boardId: string) => {
@@ -128,6 +132,21 @@ function ForumHome() {
     setWelcomeOpen(false);
   }, [clearNewDay, user]);
 
+  const openBoard = useCallback((boardSlug: string) => {
+    setActiveTab("boards");
+    setActiveBoardSlug(boardSlug);
+    setActiveThreadId(null);
+  }, []);
+
+  const openThread = useCallback((threadId: number) => {
+    setActiveThreadId(threadId);
+  }, []);
+
+  const closeForumView = useCallback(() => {
+    setActiveBoardSlug(null);
+    setActiveThreadId(null);
+  }, []);
+
   return (
     <div className="app-shell">
       <div className="bg-noise" aria-hidden />
@@ -146,7 +165,21 @@ function ForumHome() {
           <Hero />
           {activeTab === "boards" && (
             <>
-              {filteredCategories.length === 0 ? (
+              {activeThreadId !== null ? (
+                <ForumThreadView
+                  threadId={activeThreadId}
+                  onBackToBoard={(slug) => {
+                    setActiveBoardSlug(slug);
+                    setActiveThreadId(null);
+                  }}
+                />
+              ) : activeBoardSlug ? (
+                <ForumBoardView
+                  boardSlug={activeBoardSlug}
+                  onBack={closeForumView}
+                  onOpenThread={openThread}
+                />
+              ) : filteredCategories.length === 0 ? (
                 <p className="board-search-empty" role="status">
                   No boards match “{boardSearchQuery.trim()}”. Try another word or{" "}
                   <button
@@ -165,6 +198,7 @@ function ForumHome() {
                     category={cat}
                     canPost={!!user}
                     onStartThread={openCreatePost}
+                    onOpenBoard={openBoard}
                   />
                 ))
               )}

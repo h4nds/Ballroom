@@ -16,5 +16,10 @@ Rails.application.routes.draw do
     post "auth/sign_in", to: "auth#sign_in"
     delete "auth/sign_out", to: "auth#sign_out"
     resources :posts, only: %i[index create]
+    get "boards", to: "forum_boards#index"
+    get "boards/:slug", to: "forum_boards#show"
+    post "boards/:board_slug/threads", to: "forum_threads#create"
+    get "threads/:id", to: "forum_threads#show"
+    post "threads/:id/posts", to: "forum_threads#create_post"
   end
 end

@@ -1,17 +1,19 @@
 import { useEffect, useId, useState } from "react";
 import { useForumSounds } from "../hooks/useForumSounds";
 import { listBoardsForPicker } from "../data/forumData";
-import { createPost } from "../lib/postsApi";
+import { createThread } from "../lib/forumApi";
 
 type Props = {
   open: boolean;
   defaultBoardId: string;
   onClose: () => void;
+  /** Opens the new thread in the board view after a successful create. */
+  onThreadCreated?: (threadId: number, boardSlug: string) => void;
 };
 
 const pickerOptions = listBoardsForPicker();
 
-export function CreatePostModal({ open, defaultBoardId, onClose }: Props) {
+export function CreatePostModal({ open, defaultBoardId, onClose, onThreadCreated }: Props) {
   const { play } = useForumSounds();
   const titleId = useId();
   const [boardId, setBoardId] = useState(defaultBoardId);
@@ -51,15 +53,17 @@ export function CreatePostModal({ open, defaultBoardId, onClose }: Props) {
 
     setPending(true);
     setError(null);
-    const result = await createPost({ boardId, title: t, body: b });
-    setPending(false);
-    if (!result.ok) {
+    try {
+      const thread = await createThread({ boardSlug: boardId, subject: t, body: b });
+      play("success");
+      onThreadCreated?.(thread.id, boardId);
+      onClose();
+    } catch (err) {
       play("whoosh");
-      setError(result.error);
-      return;
+      setError(err instanceof Error ? err.message : "could not start thread");
+    } finally {
+      setPending(false);
     }
-    play("success");
-    onClose();
   };
 
   return (

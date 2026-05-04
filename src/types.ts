@@ -54,17 +54,6 @@ export interface Category {
   boards: Board[];
 }
 
-/** Post returned from `POST /api/posts`. */
-export interface PostRecord {
-  id: number;
-  boardId: string;
-  title: string;
-  body: string;
-  authorDisplayName: string;
-  authorUsername: string;
-  createdAt: string;
-}
-
 export interface ForumBoardRecord {
   id: number;
   slug: string;

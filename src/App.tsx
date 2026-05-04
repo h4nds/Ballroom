@@ -234,6 +234,11 @@ function ForumHome() {
         open={createPostOpen}
         defaultBoardId={createPostBoardId}
         onClose={() => setCreatePostOpen(false)}
+        onThreadCreated={(threadId, boardSlug) => {
+          setActiveTab("boards");
+          setActiveBoardSlug(boardSlug);
+          setActiveThreadId(threadId);
+        }}
       />
       <MembersModal
         open={membersOpen}

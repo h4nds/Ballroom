@@ -36,11 +36,17 @@ Rails.application.configure do
   config.hosts << "lvh.me"
   config.hosts << /.*\.lvh\.me/
 
-  # dotenv loads SECRET_KEY_BASE in development when credentials are not configured yet.
-  if ENV["SECRET_KEY_BASE"].blank?
-    raise <<~MSG.squish
-      Missing SECRET_KEY_BASE. Copy backend/.env.example to backend/.env and set SECRET_KEY_BASE
-      (run: ruby -e "puts SecureRandom.hex(64)").
-    MSG
+  # Prefer SECRET_KEY_BASE from .env; otherwise persist a dev-only key so first `rails server` works
+  # without copying .env (sessions stay valid across restarts).
+  secret_path = Rails.root.join("tmp/development_secret_key_base.txt")
+  config.secret_key_base = ENV["SECRET_KEY_BASE"].presence || begin
+    if secret_path.exist?
+      secret_path.read.strip
+    else
+      FileUtils.mkdir_p(secret_path.dirname)
+      secret = SecureRandom.hex(64)
+      secret_path.write("#{secret}\n")
+      secret
+    end
   end
 end

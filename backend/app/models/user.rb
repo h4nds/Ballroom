@@ -6,7 +6,6 @@ class User < ApplicationRecord
 
   has_secure_password
 
-  has_many :posts, dependent: :destroy
   has_many :forum_threads, dependent: :destroy
   has_many :forum_posts, dependent: :destroy
   has_many :active_follows, class_name: "Follow", foreign_key: :follower_id, inverse_of: :follower, dependent: :destroy

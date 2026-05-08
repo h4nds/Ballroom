@@ -54,11 +54,45 @@ export interface Category {
   boards: Board[];
 }
 
-/** Post returned from `POST /api/posts`. */
-export interface PostRecord {
+export interface ForumBoardRecord {
   id: number;
-  boardId: string;
-  title: string;
+  slug: string;
+  name: string;
+  description: string;
+  threadCount: number;
+  /** Threads plus replies (each OP counts as activity). */
+  postCount: number;
+  latestSubject?: string;
+  latestAuthorDisplayName?: string;
+  latestBumpedAt?: string;
+}
+
+export interface ForumThreadRow {
+  id: number;
+  boardSlug: string;
+  subject: string;
+  opBodyPreview: string;
+  authorDisplayName: string;
+  authorUsername: string;
+  replyCount: number;
+  createdAt: string;
+  bumpedAt: string;
+}
+
+export interface ForumThreadRecord {
+  id: number;
+  boardSlug: string;
+  subject: string;
+  opBody: string;
+  authorDisplayName: string;
+  authorUsername: string;
+  createdAt: string;
+  bumpedAt: string;
+}
+
+export interface ForumPostRecord {
+  id: number;
+  threadId: number;
   body: string;
   authorDisplayName: string;
   authorUsername: string;

@@ -88,7 +88,7 @@ export const categories: Category[] = [
   },
 ];
 
-/** Labels for the new-post board picker; ids must match `Post::BOARD_SLUGS` on the server. */
+/** Labels for the new-post board picker; ids must match forum board slugs from `db/seeds.rb`. */
 export function listBoardsForPicker(): { id: string; label: string }[] {
   return categories.flatMap((cat) =>
     cat.boards.map((b) => ({

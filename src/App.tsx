@@ -3,8 +3,10 @@ import type { AuthOpenMode } from "./types";
 import { UserProvider, useUser } from "./context/UserContext";
 import { SoundsProvider } from "./context/SoundsContext";
 import { ThemeProvider } from "./context/ThemeContext";
-import { categories } from "./data/forumData";
+import { categories as staticCategories } from "./data/forumData";
 import { filterCategories } from "./lib/filterCategories";
+import { getForumBoards } from "./lib/forumApi";
+import { mergeCategoriesWithBoardApi } from "./lib/mergeBoardMetrics";
 import { isTypingInTextField, tabFromShiftDigitCode } from "./lib/keyboardNav";
 import { useForumSounds } from "./hooks/useForumSounds";
 import type { HeaderSearchHandle } from "./components/HeaderSearch";
@@ -43,7 +45,18 @@ function ForumHome() {
   const [publicProfileUsername, setPublicProfileUsername] = useState<string | null>(null);
   const [activeBoardSlug, setActiveBoardSlug] = useState<string | null>(null);
   const [activeThreadId, setActiveThreadId] = useState<number | null>(null);
+  const [boardCategories, setBoardCategories] = useState(staticCategories);
   const prevUser = useRef<string | null>(null);
+
+  const reloadBoardCategories = useCallback(() => {
+    void getForumBoards()
+      .then((boards) => setBoardCategories(mergeCategoriesWithBoardApi(staticCategories, boards)))
+      .catch(() => setBoardCategories(staticCategories));
+  }, []);
+
+  useEffect(() => {
+    reloadBoardCategories();
+  }, [reloadBoardCategories]);
 
   const openCreatePost = useCallback((boardId: string) => {
     setCreatePostBoardId(boardId);
@@ -51,8 +64,8 @@ function ForumHome() {
   }, []);
 
   const filteredCategories = useMemo(
-    () => filterCategories(categories, boardSearchQuery),
-    [boardSearchQuery],
+    () => filterCategories(boardCategories, boardSearchQuery),
+    [boardCategories, boardSearchQuery],
   );
 
   useEffect(() => {
@@ -178,6 +191,7 @@ function ForumHome() {
                   boardSlug={activeBoardSlug}
                   onBack={closeForumView}
                   onOpenThread={openThread}
+                  onBoardMetricsStale={reloadBoardCategories}
                 />
               ) : filteredCategories.length === 0 ? (
                 <p className="board-search-empty" role="status">
@@ -238,6 +252,7 @@ function ForumHome() {
           setActiveTab("boards");
           setActiveBoardSlug(boardSlug);
           setActiveThreadId(threadId);
+          reloadBoardCategories();
         }}
       />
       <MembersModal

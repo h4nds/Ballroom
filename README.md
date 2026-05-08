@@ -9,61 +9,74 @@
                                                  ▀▀
 ```
 
-# The Ballroom Fourm by RayWretch 
+# The Ballroom Forum by RayWretch
 
-A React + Vite forum-style web app with a Rails JSON API. The Vite dev server proxies `/api` to Rails on port **3000**.
+A React + Vite forum-style web app with a Rails JSON API. In development, Vite proxies `/api` to Rails on port **3000**.
 
 ## Prerequisites
 
-- **Node.js** (for the frontend)
-- **Ruby** and **Bundler** (for the API)
-- **PostgreSQL** (see `backend/.env.example` for typical connection settings)
+- **Node.js** (frontend)
+- **Ruby** ≥ **3.2** (see `backend/.ruby-version`; use [RubyInstaller](https://rubyinstaller.org/) on Windows and enable **Add Ruby to PATH**)
+- **Bundler**: `gem install bundler`
+- **PostgreSQL** (running locally; defaults match `backend/.env.example`)
 
 ## Setup
 
-**Frontend** (repo root):
+**1. Frontend** (repository root):
 
 ```bash
 npm install
 ```
 
-**Backend**:
+**2. Backend**:
 
 ```bash
 cd backend
+bundle install
+```
 
-Run **two** processes:
+Copy `backend/.env.example` to `backend/.env` (Windows: `copy .env.example .env`; Unix/macOS: `cp .env.example .env`).
 
-1. **API** — from the repo root:
+Edit `.env` if your Postgres user, password, or host differs.
 
-   ```bash
-   npm run dev:api
-   ```
+```bash
+ruby bin/rails db:prepare
+ruby bin/rails db:seed
+```
 
-   Starts Rails on `http://127.0.0.1:3000`.
+**3. Run two terminals**
 
-2. **Frontend** — in another terminal:
+Terminal A — API (from repository root):
 
-   ```bash
-   npm run dev
-   ```
+```bash
+npm run dev:api
+```
 
-   Opens the Vite app (default `http://localhost:5173`). Requests to `/api/*` are proxied to Rails.
+Rails listens at **http://127.0.0.1:3000**.
 
-Without the API running, auth and other `/api` calls will fail with a network error.
+Terminal B — frontend:
+
+```bash
+npm run dev
+```
+
+Open **http://localhost:5173**. Requests to `/api/*` are proxied to Rails.
+
+Without the API running, `/api` calls fail (for example `ECONNREFUSED` on port 3000).
+
+### Quick smoke check
+
+1. Open the app, sign up or sign in.
+2. Open a board, create a thread, reply once.
+3. Confirm counts on the home board list update after refresh.
 
 ## Build
 
 ```bash
 npm run build
-```
-
-
-
-```bash
 npm run preview
 ```
 
 ## License
 
-2026 RayWretch | h4nds| JN | EnWretched . All Rights Reserved
+2026 RayWretch | h4nds | JN | EnWretched. All Rights Reserved

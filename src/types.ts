@@ -60,6 +60,11 @@ export interface ForumBoardRecord {
   name: string;
   description: string;
   threadCount: number;
+  /** Threads plus replies (each OP counts as activity). */
+  postCount: number;
+  latestSubject?: string;
+  latestAuthorDisplayName?: string;
+  latestBumpedAt?: string;
 }
 
 export interface ForumThreadRow {

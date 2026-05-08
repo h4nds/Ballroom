@@ -8,6 +8,8 @@ type Props = {
   boardSlug: string;
   onBack: () => void;
   onOpenThread: (threadId: number) => void;
+  /** Home board list refetches counts/latest after new activity. */
+  onBoardMetricsStale?: () => void;
 };
 
 function formatWhen(iso: string): string {
@@ -15,7 +17,7 @@ function formatWhen(iso: string): string {
   return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-export function ForumBoardView({ boardSlug, onBack, onOpenThread }: Props) {
+export function ForumBoardView({ boardSlug, onBack, onOpenThread, onBoardMetricsStale }: Props) {
   const { user } = useUser();
   const { play } = useForumSounds();
   const [board, setBoard] = useState<ForumBoardRecord | null>(null);
@@ -61,6 +63,7 @@ export function ForumBoardView({ boardSlug, onBack, onOpenThread }: Props) {
       setSubject("");
       setBody("");
       play("success");
+      onBoardMetricsStale?.();
       onOpenThread(thread.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "failed to create thread");

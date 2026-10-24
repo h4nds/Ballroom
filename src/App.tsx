@@ -141,50 +141,45 @@ function ForumHome() {
       />
       <SubNav active={activeTab} onChange={setActiveTab} />
 
-      <main className="main-grid">
-        <div className="main-col">
-          <Hero />
-          {activeTab === "boards" && (
-            <>
-              {filteredCategories.length === 0 ? (
-                <p className="board-search-empty" role="status">
-                  No boards match “{boardSearchQuery.trim()}”. Try another word or{" "}
-                  <button
-                    type="button"
-                    className="linkish board-search-clear"
-                    onClick={() => setBoardSearchQuery("")}
-                  >
-                    clear search
-                  </button>
-                  .
-                </p>
-              ) : (
-                filteredCategories.map((cat) => (
-                  <BoardSection
-                    key={cat.id}
-                    category={cat}
-                    canPost={!!user}
-                    onStartThread={openCreatePost}
-                  />
-                ))
-              )}
-              {filteredCategories.length > 0 && (
-                <div className="scroll-hint" aria-hidden>
-                  <span className="scroll-arrow">↓</span>
-                </div>
-              )}
-            </>
-          )}
-          {activeTab !== "boards" && (
-            <section className="placeholder-panel sheet-pop">
-              <h2 className="placeholder-title">{activeTab.replace("-", " ")}</h2>
-              <p className="placeholder-copy">
-                Hammer & nail!!!!
-              </p>
-            </section>
-          )}
-        </div>
-        <Sidebar />
+      <main className="floor">
+        <Hero />
+        {activeTab === "boards" && filteredCategories.length === 0 ? (
+          <p className="board-search-empty" role="status">
+            No boards match “{boardSearchQuery.trim()}”. Try another word or{" "}
+            <button
+              type="button"
+              className="linkish board-search-clear"
+              onClick={() => setBoardSearchQuery("")}
+            >
+              clear search
+            </button>
+            .
+          </p>
+        ) : (
+          <div className="floor-columns">
+            {activeTab === "boards" &&
+              filteredCategories.map((cat) => (
+                <BoardSection
+                  key={cat.id}
+                  category={cat}
+                  canPost={!!user}
+                  onStartThread={openCreatePost}
+                />
+              ))}
+            {activeTab !== "boards" && (
+              <section className="placeholder-panel sheet-pop">
+                <h2 className="placeholder-title">{activeTab.replace("-", " ")}</h2>
+                <p className="placeholder-copy">Hammer & nail!!!!</p>
+              </section>
+            )}
+            <Sidebar />
+          </div>
+        )}
+        {activeTab === "boards" && filteredCategories.length > 0 && (
+          <div className="scroll-hint" aria-hidden>
+            <span className="scroll-arrow">↓</span>
+          </div>
+        )}
       </main>
 
       <AuthModal

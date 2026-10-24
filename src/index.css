@@ -531,22 +531,25 @@ body {
   box-shadow: 0 2px 0 0 var(--teal-dim);
 }
 
-/* Layout */
-.main-grid {
-  display: grid;
-  grid-template-columns: 1fr minmax(240px, 300px);
-  gap: var(--space-7);
-  align-items: start;
-}
-
-@media (max-width: 1023px) {
-  .main-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.main-col {
+/* Layout: two columns of boards, with the community panel in the flow */
+.floor {
   min-width: 0;
+}
+
+.floor-columns {
+  column-count: 2;
+  column-gap: var(--space-7);
+}
+
+.floor-columns > * {
+  break-inside: avoid;
+  margin-bottom: var(--space-8);
+}
+
+@media (max-width: 800px) {
+  .floor-columns {
+    column-count: 1;
+  }
 }
 
 /* Hero */
@@ -644,7 +647,7 @@ button.board-search-clear {
 
 /* Board sections */
 .board-section {
-  margin-bottom: var(--space-9);
+  margin-bottom: 0;
 }
 
 .board-section-head {
@@ -674,6 +677,22 @@ button.board-search-clear {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+}
+
+.floor-columns .board-row {
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-items: start;
+}
+
+.floor-columns .board-metrics,
+.floor-columns .board-latest {
+  grid-column: 2;
+  text-align: left;
+}
+
+.floor-columns .latest-title {
+  max-width: none;
+  white-space: normal;
 }
 
 .board-row {
@@ -872,8 +891,6 @@ button.board-search-clear {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  position: sticky;
-  top: var(--space-4);
 }
 
 .widget {

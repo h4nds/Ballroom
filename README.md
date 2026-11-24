@@ -9,7 +9,7 @@
                                                  ▀▀
 ```
 
-# The Ballroom Fourm by RayWretch 
+# The Ballroom Fourm by RayWretch | JN
 
 A React + Vite forum-style web app with a Rails JSON API. The Vite dev server proxies `/api` to Rails on port **3000**.
 

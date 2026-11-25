@@ -1,4 +1,5 @@
 import type { Accent } from "../types";
+import { articles } from "../data/floorContent";
 import { initialsFrom, useUser } from "../context/UserContext";
 
 const dotClass: Record<Accent, string> = {
@@ -7,7 +8,11 @@ const dotClass: Record<Accent, string> = {
   yellow: "dot-yellow",
 };
 
-export function Sidebar() {
+type Props = {
+  onOpenArticle?: (articleId: string) => void;
+};
+
+export function Sidebar({ onOpenArticle }: Props) {
   const { user } = useUser();
 
   const roster = user
@@ -47,7 +52,22 @@ export function Sidebar() {
 
       <section className="widget">
         <h3 className="widget-title">newest threads</h3>
-        <p className="widget-empty">Nothing posted yet. Threads will show up here.</p>
+        <ul className="online-list thread-side-list">
+          {articles.slice(0, 4).map((article) => (
+            <li key={article.id}>
+              {onOpenArticle ? (
+                <button type="button" className="text-button" onClick={() => onOpenArticle(article.id)}>
+                  {article.title}
+                </button>
+              ) : (
+                <span>{article.title}</span>
+              )}
+              <span className="online-disc">
+                {article.author} · {article.ago}
+              </span>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section className="widget">

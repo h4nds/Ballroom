@@ -10,12 +10,22 @@ const accentClass: Record<Board["accent"], string> = {
 
 type Props = {
   board: Board;
-  /** Signed-in users can open the new-thread flow for this board. */
+  
   canPost?: boolean;
+  onOpenBoard?: (boardId: string) => void;
+  onOpenArticle?: (articleId: string) => void;
+  latestArticleId?: string;
   onStartThread?: (boardId: string) => void;
 };
 
-export function BoardRow({ board, canPost = false, onStartThread }: Props) {
+export function BoardRow({
+  board,
+  canPost = false,
+  onOpenBoard,
+  onOpenArticle,
+  latestArticleId,
+  onStartThread,
+}: Props) {
   const { play } = useForumSounds();
 
   return (
@@ -27,7 +37,15 @@ export function BoardRow({ board, canPost = false, onStartThread }: Props) {
         <BoardIcon name={board.icon} />
       </div>
       <div className="board-main">
-        <h3 className="board-title">{board.name}</h3>
+        <h3 className="board-title">
+          {onOpenBoard ? (
+            <button type="button" className="text-button" onClick={() => onOpenBoard(board.id)}>
+              {board.name}
+            </button>
+          ) : (
+            board.name
+          )}
+        </h3>
         <p className="board-desc">{board.description}</p>
         {canPost && onStartThread ? (
           <button
@@ -55,7 +73,17 @@ export function BoardRow({ board, canPost = false, onStartThread }: Props) {
       <div className="board-latest">
         {board.latestTitle && board.latestAuthor && board.latestAgo ? (
           <>
-            <span className="latest-title">{board.latestTitle}</span>
+            {onOpenArticle && latestArticleId ? (
+              <button
+                type="button"
+                className="text-button latest-title"
+                onClick={() => onOpenArticle(latestArticleId)}
+              >
+                {board.latestTitle}
+              </button>
+            ) : (
+              <span className="latest-title">{board.latestTitle}</span>
+            )}
             <span className="latest-meta">
               by {board.latestAuthor} · {board.latestAgo}
             </span>

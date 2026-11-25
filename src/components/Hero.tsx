@@ -2,12 +2,11 @@ export function Hero() {
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div className="hero-copy">
-        <p className="eyebrow" id="hero-title">
-          welcome to the floor
-        </p>
-        <p className="hero-tagline">
-          um hey..
-        </p>
+        <p className="eyebrow">welcome to the floor</p>
+        <h1 className="hero-title" id="hero-title">
+          the floor
+        </h1>
+        <p className="hero-tagline">um hey..</p>
       </div>
       <dl className="hero-stats">
         <div>

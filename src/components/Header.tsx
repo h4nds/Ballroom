@@ -6,6 +6,7 @@ import { useSounds } from "../context/SoundsContext";
 import { HeaderSearch, type HeaderSearchHandle } from "./HeaderSearch";
 
 type Props = {
+  onHome: () => void;
   onOpenAuth: (mode: AuthOpenMode) => void;
   onOpenProfile: () => void;
   onOpenMembers: () => void;
@@ -15,6 +16,7 @@ type Props = {
 };
 
 export function Header({
+  onHome,
   onOpenAuth,
   onOpenProfile,
   onOpenMembers,
@@ -31,6 +33,10 @@ export function Header({
       <a
         href="/"
         className="logo"
+        onClick={(e) => {
+          e.preventDefault();
+          onHome();
+        }}
         onPointerDown={() => play("tap")}
         onKeyDown={(e) => e.key === "Enter" && play("tap")}
         aria-label="Ballroom — home"
